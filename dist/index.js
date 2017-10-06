@@ -98,7 +98,7 @@ const fetch = __webpack_require__(2);
 const defaultDynaFetchParams = {
     timeout: 0,
     retryMaxTimes: 0,
-    retryTimeout: 3000,
+    retryTimeout: 0,
     onRetry: () => undefined,
 };
 exports.dynaFetch = (url, fetchParams = {}, dynaFetchParams_ = {}) => {

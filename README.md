@@ -14,6 +14,14 @@ Written in Typescript, it is universal and runs everywhere (in Typescript or Jav
 
 The `IDynaFetch` interface is actually a `Promise<Response>` extended with only one method, the `abort` _see later in this text_.
 
+## fetchParams
+
+Are the `fetch` params, check [here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) for more.
+
+## dynaFetchParams
+
+Are params supported by the `dyna-fetch`, see [here](#idynafetchparams) for more.
+
 # Usage
 ```
 import {dynaFetch} from 'dyna-fetch';
@@ -150,7 +158,7 @@ interface IDynaFetch extends Promise<Response> {
 interface IDynaFetchParams {
   timeout?: number;         // in ms, when the fetch will fail
   retryMaxTimes?: number;	// how many times should retry (defalut = 1)
-  retryTimeout?: number;    // in ms, after how much time will wait (after a network fail or timeout fail)
+  retryTimeout?: number;    // in ms, retry after a timeout (after a network fail or timeout fail)
   onRetry?: () => void;		// callback in case of retry
 }
 ```

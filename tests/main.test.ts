@@ -15,7 +15,7 @@ describe('dynaFetch test', () => {
         done();
       })
       .catch((error: IError) => {
-        expect(error).toBe(undefined);
+        expect(error).not.toBe(undefined);
         done();
       });
   });

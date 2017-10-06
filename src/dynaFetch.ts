@@ -15,7 +15,7 @@ export interface IDynaFetch extends Promise<Response> {
 const defaultDynaFetchParams: IDynaFetchParams = {
   timeout: 0,
   retryMaxTimes: 0,
-  retryTimeout: 3000,
+  retryTimeout: 0,
   onRetry: () => undefined,
 };
 
