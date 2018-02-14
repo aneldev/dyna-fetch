@@ -1,3 +1,3 @@
-import "./mock-jest";
+import "./utils/mock-jest";
 
-import "./main.test";
+import "./scripts/main.test";

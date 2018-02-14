@@ -8,15 +8,14 @@ const nodeExternals = require('webpack-node-externals');
 const loaders = require('./webpack.loaders');
 const plugins = require('./webpack.plugins');
 
-console.log('');
 console.log('DEBUG with devtools in nodeJs ');
-console.log('WARNING: you should run the `npm run debug-build` in order to debug your latest changes!');
-console.log('');
+console.log('WARNING: you should run the `npm run debug-dev-build` in order to debug your latest changes!');
 
 const config = {
   target: 'node', // help: https://webpack.github.io/docs/configuration.html#target
   entry: [
-    // the entry application code
+	  'babel-polyfill',
+		// the entry application code
     path.resolve(__dirname, 'tests/index.ts')
   ],
   externals: [nodeExternals()], // in order to ignore all modules in node_modules folder

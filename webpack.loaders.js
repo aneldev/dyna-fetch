@@ -2,9 +2,6 @@
 // help: https://webpack.github.io/docs/webpack-dev-server.html#webpack-dev-server-cli
 
 const fs = require('fs');
-let reactPresets = [];
-
-if (fs.existsSync('./node_modules/react')) reactPresets.push('react');
 
 module.exports = [
   {
@@ -12,7 +9,7 @@ module.exports = [
     test: /\.(jsx|js)$/,
     loader: 'babel-loader',
     query: {
-      presets: ['es2015', 'babel-polyfill', 'stage-2'].concat(reactPresets),
+      presets: ["es2015", "stage-2"],
     }
   },
   {

@@ -83,7 +83,7 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const dynaFetch_1 = __webpack_require__(1);
+var dynaFetch_1 = __webpack_require__(1);
 exports.dynaFetch = dynaFetch_1.dynaFetch;
 
 
@@ -93,34 +93,44 @@ exports.dynaFetch = dynaFetch_1.dynaFetch;
 
 "use strict";
 
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fetch = __webpack_require__(2);
-const defaultDynaFetchParams = {
+var fetch = __webpack_require__(2);
+var defaultDynaFetchParams = {
     timeout: 0,
     retryMaxTimes: 0,
     retryTimeout: 0,
-    onRetry: () => undefined,
+    onRetry: function () { return undefined; },
 };
-exports.dynaFetch = (url, fetchParams = {}, dynaFetchParams_ = {}) => {
-    const dynaFetchParams = Object.assign({}, defaultDynaFetchParams, dynaFetchParams_);
-    let aborted = false;
-    let timeoutTimer;
-    let failedTimes = 0;
-    let reject_;
-    let debugInfo;
-    const output = new Promise((resolve, reject) => {
+exports.dynaFetch = function (url, fetchParams, dynaFetchParams_) {
+    if (fetchParams === void 0) { fetchParams = {}; }
+    if (dynaFetchParams_ === void 0) { dynaFetchParams_ = {}; }
+    var dynaFetchParams = __assign({}, defaultDynaFetchParams, dynaFetchParams_);
+    var aborted = false;
+    var timeoutTimer;
+    var failedTimes = 0;
+    var reject_;
+    var debugInfo;
+    var output = new Promise(function (resolve, reject) {
         reject_ = reject;
-        debugInfo = { url, fetchParams, dynaFetchParams: dynaFetchParams_, failedTimes };
-        const callFetch = () => {
+        debugInfo = { url: url, fetchParams: fetchParams, dynaFetchParams: dynaFetchParams_, failedTimes: failedTimes };
+        var callFetch = function () {
             fetch(url, fetchParams)
-                .then((response) => {
+                .then(function (response) {
                 if (aborted)
                     return;
                 if (timeoutTimer)
                     clearTimeout(timeoutTimer);
                 resolve(response);
             })
-                .catch((error) => {
+                .catch(function (error) {
                 if (aborted)
                     return;
                 if (timeoutTimer)
@@ -128,19 +138,19 @@ exports.dynaFetch = (url, fetchParams = {}, dynaFetchParams_ = {}) => {
                 failedTimes++;
                 if (dynaFetchParams.retryMaxTimes && failedTimes <= dynaFetchParams.retryMaxTimes) {
                     dynaFetchParams.onRetry && dynaFetchParams.onRetry();
-                    setTimeout(() => callFetch(), dynaFetchParams.retryTimeout);
+                    setTimeout(function () { return callFetch(); }, dynaFetchParams.retryTimeout);
                 }
                 else {
                     reject({
                         code: 5007,
                         message: 'general fetch network error (see the error property)',
                         data: debugInfo,
-                        error
+                        error: error
                     });
                 }
             });
             if (dynaFetchParams.timeout) {
-                timeoutTimer = setTimeout(() => {
+                timeoutTimer = setTimeout(function () {
                     if (aborted)
                         return;
                     if (timeoutTimer)
@@ -148,7 +158,7 @@ exports.dynaFetch = (url, fetchParams = {}, dynaFetchParams_ = {}) => {
                     failedTimes++;
                     if (dynaFetchParams.retryMaxTimes && failedTimes <= dynaFetchParams.retryMaxTimes) {
                         dynaFetchParams.onRetry && dynaFetchParams.onRetry();
-                        setTimeout(() => callFetch(), dynaFetchParams.retryTimeout);
+                        setTimeout(function () { return callFetch(); }, dynaFetchParams.retryTimeout);
                     }
                     else {
                         aborted = true;
@@ -164,7 +174,7 @@ exports.dynaFetch = (url, fetchParams = {}, dynaFetchParams_ = {}) => {
         };
         callFetch();
     });
-    output.abort = () => {
+    output.abort = function () {
         if (timeoutTimer)
             clearTimeout(timeoutTimer);
         aborted = true;

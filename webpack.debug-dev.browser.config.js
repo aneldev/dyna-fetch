@@ -11,14 +11,15 @@ const config = {
   target: 'web', // help: https://webpack.github.io/docs/configuration.html#target
   entry: [
     // inject some code in order to enable the auto refresh of the browse in case of a file's change
+	  'babel-polyfill',
     'webpack-dev-server/client?http://localhost:8027',
     // the entry application code
-    path.resolve(__dirname, 'debug-dev/index.ts')
+    path.resolve(__dirname, 'dev/index.ts')
   ],
-  externals: [],
+	externals: [],
   output: {
     path: path.resolve(__dirname, 'debug-ground/debug-dev-on-browser'),
-    filename: 'debug-browser.js'
+    filename: 'debug-dev-browser.js'
   },
   resolve: {
     alias: {},
