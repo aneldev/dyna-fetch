@@ -2894,6 +2894,11 @@ dyna-interfaces@^1.6.1:
   resolved "https://registry.yarnpkg.com/dyna-interfaces/-/dyna-interfaces-1.6.1.tgz#33e4f2ab78d24a7e072718c57ae418dc7f197849"
   integrity sha1-M+Tyq3jSSn4HJxjFeuQY3H8ZeEk=
 
+dyna-loops@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/dyna-loops/-/dyna-loops-1.7.2.tgz#037fbcbf087f11a8b9cf75ed7360f4de4c44fb8e"
+  integrity sha512-WpdETQOA9pyXxDX+a2LQOK4KLHGaIes5WCwQFBaf6uVsa7qxDUVvsbtp9DyQaE0uO6MZiWG8+UX9XBzzYs2+sQ==
+
 dyna-node-console@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/dyna-node-console/-/dyna-node-console-1.0.7.tgz#948adbe8f907fa09f9897353d0522a992926d78e"

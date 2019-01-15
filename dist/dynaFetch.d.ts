@@ -1,12 +1,14 @@
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { IError } from "dyna-interfaces";
+export { AxiosRequestConfig, AxiosResponse, IError, };
 export interface IDynaFetchParams {
     timeout?: number;
     retryMaxTimes?: number;
     retryTimeout?: number;
+    timeoutRandomFactor?: number;
     onRetry?: () => void;
 }
-export interface IDynaFetch extends Promise<Response> {
+export interface IDynaFetch extends Promise<AxiosResponse> {
     abort?: () => void;
 }
-export { IError };
-export declare const dynaFetch: (url: string, fetchParams?: RequestInit, dynaFetchParams_?: IDynaFetchParams) => IDynaFetch;
+export declare const dynaFetch: <TData>(url: string, axiosRequestConfig?: AxiosRequestConfig, dynaFetchParams_?: IDynaFetchParams) => IDynaFetch;

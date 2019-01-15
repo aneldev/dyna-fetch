@@ -125,20 +125,23 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var fetch = __webpack_require__(/*! isomorphic-fetch */ "isomorphic-fetch");
+var axios_1 = __webpack_require__(/*! axios */ "axios");
+
+var dyna_loops_1 = __webpack_require__(/*! dyna-loops */ "dyna-loops");
 
 var defaultDynaFetchParams = {
   timeout: 0,
   retryMaxTimes: 0,
   retryTimeout: 0,
+  timeoutRandomFactor: 1,
   onRetry: function () {
     return undefined;
   }
 };
 
-exports.dynaFetch = function (url, fetchParams, dynaFetchParams_) {
-  if (fetchParams === void 0) {
-    fetchParams = {};
+exports.dynaFetch = function (url, axiosRequestConfig, dynaFetchParams_) {
+  if (axiosRequestConfig === void 0) {
+    axiosRequestConfig = {};
   }
 
   if (dynaFetchParams_ === void 0) {
@@ -152,17 +155,24 @@ exports.dynaFetch = function (url, fetchParams, dynaFetchParams_) {
   var failedTimes = 0;
   var reject_;
   var debugInfo;
+
+  var getDelay = function () {
+    return dynaFetchParams.retryTimeout * (dyna_loops_1.random(0, dynaFetchParams.timeoutRandomFactor * 100) / 100);
+  };
+
   var output = new Promise(function (resolve, reject) {
     reject_ = reject;
     debugInfo = {
       url: url,
-      fetchParams: fetchParams,
+      fetchParams: axiosRequestConfig,
       dynaFetchParams: dynaFetchParams_,
       failedTimes: failedTimes
     };
 
     var callFetch = function () {
-      fetch(url, fetchParams).then(function (response) {
+      axios_1.default.request(__assign({}, axiosRequestConfig, {
+        url: url || axiosRequestConfig.url
+      })).then(function (response) {
         if (aborted) return;
         if (timeoutTimer) clearTimeout(timeoutTimer);
         resolve(response);
@@ -175,7 +185,7 @@ exports.dynaFetch = function (url, fetchParams, dynaFetchParams_) {
           dynaFetchParams.onRetry && dynaFetchParams.onRetry();
           setTimeout(function () {
             return callFetch();
-          }, dynaFetchParams.retryTimeout);
+          }, getDelay());
         } else {
           reject({
             code: 5007,
@@ -196,7 +206,7 @@ exports.dynaFetch = function (url, fetchParams, dynaFetchParams_) {
             dynaFetchParams.onRetry && dynaFetchParams.onRetry();
             setTimeout(function () {
               return callFetch();
-            }, dynaFetchParams.retryTimeout);
+            }, getDelay());
           } else {
             aborted = true;
             reject({
@@ -250,15 +260,27 @@ exports.dynaFetch = dynaFetch_1.dynaFetch;
 
 /***/ }),
 
-/***/ "isomorphic-fetch":
-/*!***********************************!*\
-  !*** external "isomorphic-fetch" ***!
-  \***********************************/
+/***/ "axios":
+/*!************************!*\
+  !*** external "axios" ***!
+  \************************/
 /*! no static exports found */
 /*! all exports used */
 /***/ (function(module, exports) {
 
-module.exports = require("isomorphic-fetch");
+module.exports = require("axios");
+
+/***/ }),
+
+/***/ "dyna-loops":
+/*!*****************************!*\
+  !*** external "dyna-loops" ***!
+  \*****************************/
+/*! no static exports found */
+/*! all exports used */
+/***/ (function(module, exports) {
+
+module.exports = require("dyna-loops");
 
 /***/ })
 

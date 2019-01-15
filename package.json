@@ -50,7 +50,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
-    "dyna-interfaces": "^1.6.1"
+    "dyna-interfaces": "^1.6.1",
+    "dyna-loops": "^1.7.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
