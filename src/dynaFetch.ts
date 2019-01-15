@@ -1,14 +1,20 @@
-import * as fetch from 'isomorphic-fetch';
+import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
 import {IError} from "dyna-interfaces";
+
+export {
+  AxiosRequestConfig, AxiosResponse,
+  IError,
+};
 
 export interface IDynaFetchParams {
   timeout?: number;         // in ms
   retryMaxTimes?: number;
   retryTimeout?: number;    // in ms
+  timeoutRandomFactor?: number;    // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
   onRetry?: () => void;
 }
 
-export interface IDynaFetch extends Promise<Response> {
+export interface IDynaFetch extends Promise<AxiosResponse> {
   abort?: () => void;
 }
 
@@ -19,9 +25,7 @@ const defaultDynaFetchParams: IDynaFetchParams = {
   onRetry: () => undefined,
 };
 
-export {IError};
-
-export const dynaFetch = (url: string, fetchParams: RequestInit = {}, dynaFetchParams_: IDynaFetchParams = {}): IDynaFetch => {
+export const dynaFetch = <TData>(url: string, axiosRequestConfig: AxiosRequestConfig = {}, dynaFetchParams_: IDynaFetchParams = {}): IDynaFetch => {
   const dynaFetchParams: IDynaFetchParams = {
     ...defaultDynaFetchParams,
     ...dynaFetchParams_,
@@ -32,15 +36,18 @@ export const dynaFetch = (url: string, fetchParams: RequestInit = {}, dynaFetchP
   let reject_: (error: IError)=>void;
   let debugInfo: any;
 
-  const output: IDynaFetch = new Promise((resolve: (response: Response) => void, reject: (error: IError) => void) => {
+  const output: IDynaFetch = new Promise((resolve: (response: AxiosResponse) => void, reject: (error: IError) => void) => {
     reject_ = reject;
-    debugInfo = {url, fetchParams, dynaFetchParams: dynaFetchParams_, failedTimes};
+    debugInfo = {url, fetchParams: axiosRequestConfig, dynaFetchParams: dynaFetchParams_, failedTimes};
 
     const callFetch = () => {
 
-      fetch(url, fetchParams)
+      axios.request<TData>({
+        ...axiosRequestConfig,
+        url: url || axiosRequestConfig.url,
+      })
 
-        .then((response: Response) => {
+        .then((response) => {
           if (aborted) return;
           if (timeoutTimer) clearTimeout(timeoutTimer);
           resolve(response);

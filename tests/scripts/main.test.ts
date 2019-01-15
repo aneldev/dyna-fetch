@@ -1,5 +1,6 @@
 import {dynaFetch, IDynaFetch} from "../../src";
 import {IError} from "dyna-interfaces";
+import {AxiosResponse} from "../../src/dynaFetch";
 
 declare let jasmine: any, describe: any, expect: any, it: any;
 if (typeof jasmine !== 'undefined') jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
@@ -9,20 +10,20 @@ if (typeof jasmine !== 'undefined') jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 describe('dynaFetch test', () => {
   it('should fetch something from google.com', (done: Function) => {
     dynaFetch('http://www.google.com')
-      .then((response: Response) => {
+      .then((response: AxiosResponse) => {
         expect(response).not.toBe(undefined);
         done();
       })
       .catch((error: IError) => {
-        expect(error).not.toBe(undefined);
+        expect(error).toBe(undefined);
         done();
       });
   });
 
   it('should fetch json object', (done: Function) => {
     dynaFetch('https://jsonplaceholder.typicode.com/posts/1')
-      .then((response: Response) => {
-        expect(typeof response.json()).toBe('object');
+      .then((response: AxiosResponse) => {
+        expect(typeof response.data).toBe('object');
         done();
       })
       .catch((error: IError) => {
@@ -36,7 +37,7 @@ describe('dynaFetch test', () => {
       timeout: 1000,
     });
     fetchClients
-      .then((response: Response) => {
+      .then((response: AxiosResponse) => {
         expect(response).toBe(undefined);
         done();
       })
@@ -51,7 +52,7 @@ describe('dynaFetch test', () => {
     dynaFetch('https://httpstat.us/200?sleep=3000', {}, {
       timeout: 1000,
     })
-      .then((response: Response) => {
+      .then((response: AxiosResponse) => {
         expect(response).toBe(undefined);
         done();
       })
@@ -69,7 +70,7 @@ describe('dynaFetch test', () => {
       retryTimeout: 100,
       onRetry: () => retried++,
     })
-      .then((response: Response) => {
+      .then((response: AxiosResponse) => {
         expect(response).toBe(undefined);
         done();
       })
@@ -89,7 +90,7 @@ describe('dynaFetch test', () => {
       retryTimeout: 200,
       onRetry: () => retried++,
     })
-      .then((response: Response) => {
+      .then((response: AxiosResponse) => {
         expect(response).toBe(undefined);
         done();
       })
