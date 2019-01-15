@@ -1,5 +1,7 @@
-import {dynaFetch, IDynaFetchParams, IDynaFetch, IError} from './dynaFetch';
-
 export {
-  dynaFetch, IDynaFetchParams, IDynaFetch, IError
-}
+  dynaFetch,
+  IDynaFetchParams,
+  IDynaFetch,
+  IError,
+} from './dynaFetch';
+

@@ -7,7 +7,7 @@
 		exports["dyna-fetch"] = factory();
 	else
 		root["dyna-fetch"] = factory();
-})(window, function() {
+})(global, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -87,11 +87,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/dist/";
+/******/ 	__webpack_require__.p = "/";
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/index.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/node.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -250,6 +250,29 @@ exports.dynaFetch = dynaFetch_1.dynaFetch;
 
 /***/ }),
 
+/***/ "./src/node.ts":
+/*!*********************!*\
+  !*** ./src/node.ts ***!
+  \*********************/
+/*! no static exports found */
+/*! all exports used */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function __export(m) {
+  for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+__export(__webpack_require__(/*! ./index */ "./src/index.ts"));
+
+/***/ }),
+
 /***/ "isomorphic-fetch":
 /*!***********************************!*\
   !*** external "isomorphic-fetch" ***!
@@ -264,4 +287,4 @@ module.exports = require("isomorphic-fetch");
 
 /******/ });
 });
-//# sourceMappingURL=index.js.map
+//# sourceMappingURL=node.js.map
