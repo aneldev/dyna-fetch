@@ -1,135 +1,83 @@
 # About
 
-`dyna-fetch` wrapps the [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch) and adds some sugar on it like:
+`dyna-fetch` wrapps the [axios](https://github.com/axios/axios) and adds some sugar on it like:
 
+- pre-flight to bypass CORS
 - timeout
 - retry
 - abort*
 
 Written in Typescript, it is universal and runs everywhere (in Typescript or Javascript).
 
-# Signature
-
-**dynaFetch(url: string, fetchParams: RequestInit = {}, dynaFetchParams: IDynaFetchParams = {}): IDynaFetch**
-
-The `IDynaFetch` interface is actually a `Promise<Response>` extended with only one method, the `abort` _see later in this text_.
-
-## fetchParams
-
-Are the `fetch` params, check [here](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) for more.
-
-## dynaFetchParams
-
-Are params supported by the `dyna-fetch`, see [here](#idynafetchparams) for more.
-
 # Usage
 ```
 import {dynaFetch} from 'dyna-fetch';
 
-dynaFetch('https://example.com/api?client=3002', 
-	{
-		// the parameters of the isomorphic-fetch
-		// see at: https://github.com/matthew-andrews/isomorphic-fetch
-	}, 
-	{
-	  timeout: 20000,		// wait for max 20 seconds
-	  retryMaxTimes: 3,		// retry max 3 times
-	  retryTimeout: 1000,	// wait for 1sec for each retry
-	  onRetry: () => console.log('retrying...'),
-	}
-)
-.then((response: Response) => {
+const myRequest = dynaFetch({
+    url: 'https://example.com/api?client=3002',
+    preFlight: true,        // (optional) bypass CORS
+    timeout: 20000,         // (optional) wait for max 20 seconds
+    retryMaxTimes: 3,       // (optional) retry max 3 times
+    retryTimeout: 1000,     // (optional) wait for 1sec for each retry
+    retryRandomFactor: 1,   // (optional) timeout factor
+    onRetry: () => console.log('retrying...'), // (optional) 
+    })
+.then((response: AxiosResponse) => {
 	// this is the response object of isomorphic-fetch
 })
 .catch((error: IError) => {
 	// error.error is the isomorphic-fetch's error (if the error came from it)
 });
 
-```
-
-# Features
-
-## Timeout
-
-In case of timeout, the Promise will be rejected.
-
-**Example:**
-
-```
-import {dynaFetch} from 'dyna-fetch';
-
-dynaFetch('https://example.com/api?client=3002', 
-	{
-		// the parameters of the isomorphic-fetch
-	}, 
-	{
-	  timeout: 20000,		// wait for max 20 seconds
-	}
-)
-.then((response: Response) => {
-	// this is the response object of isomorphic-fetch
-})
-.catch((error: IError) => {
-	// is case of timeout error, the error.code will be 5019
-});
-```
-
-## Retry
-
-If case of network fail, or of timeout, the fetch will be retried. If the tries exceed the `retryMaxTimes` then the Promise will be rejected.
-
-**Example:**
-
-```
-import {dynaFetch} from 'dyna-fetch';
-
-dynaFetch('https://example.com/api?client=3002', 
-	{
-		// the parameters of the isomorphic-fetch
-	}, 
-	{
-	  retryMaxTimes: 3,		// retry max 3 times
-	  retryTimeout: 1000,	// wait for 1sec for each retry
-	  onRetry: () => console.log('retrying...'),
-	}
-)
-.then((response: Response) => {
-	// this is the response object of isomorphic-fetch
-})
-.catch((error: IError) => {
-	// if after 3 retries the request failed again, the error.code will be 5007
-	// the error.error is the isomorphic-fetch's error (if the error came from it)
-});
+// later you can abort it
+myRequest.abort();
 
 ```
 
-## Abort*
-
-The `fetch` yet doesn't support the `abort` feature, for more [read here](https://github.com/whatwg/fetch/issues/27).
-
-`dynaFetch` provides the `abort` method as result of `dynaFetch()` but the only that it is doing is that rejects the Promise. If you `post` and you `abort()` your `post` might be posted! 
-
-> For the future, a Cancelable promise looks promising.
-
-**Example:**
+# Arguments
 
 ```
-import {dynaFetch} from 'dyna-fetch';
-
-const fetchClients: IDynaFetch = dynaFetch('https://example.com/api?clientsGroup=3200');
-
-fetchClients
-	.then((response: Response) => {
-		// consule the response here
-	})
-	.catch((error: IError) => {
-		// this will be called with error.code 5019
-	});
-  
-fetchClients.abort();
+interface IDynaFetchConfig {
+  url: string;
+  requestConfig?: AxiosRequestConfig; // help: https://github.com/axios/axios#axios-api
+  preFlight?: boolean;                // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
+  retryMaxTimes?: number;             // default: 0
+  retryTimeout?: number;              // default: 0, in ms
+  retryRandomFactor?: number;         // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
+  onRetry?: () => void;               // callback called on each retry
+}
 ```
+
+# The Abort feature
+
+The `dynaFetch()` returns this object.
+```
+{
+  abort: () => void;
+}
+```
+
+During the execution of the request, you can abort the request.
+
+**Note**: The request is not really aborted! Due to the nature of promises this cannot be done at the moment. The `dyna-fetch` is swallowing the aborted request. 
+
 
 # Errors
+
+In case of a rejected request, if the error has to do with features of the `dyna-fetch`, the `IError` will be returned.
+
+Otherwise, the `axios`'s error will be returned.
+
+## IError
+
+```
+interface IError {
+  code?: number | string; // code
+  section?: string;       // section of the application (dynaFetch in this case)
+  message?: string;       // a meaningful dev/debug message
+  error?: any;            // nested error
+}
+```
 
 ## error.code 5007
 
@@ -143,34 +91,15 @@ In case of timeout.
 
 In case of `abort()` call.
 
-# Interfaces
+# Change log
 
-## IDynaFetch
+## v1.0.0
 
-```
-interface IDynaFetch extends Promise<Response> {
-  abort?: () => void;
-}
-```
+- Working with [isomorphic-fetch](https://github.com/matthew-andrews/isomorphic-fetch)
+- Retry feature
 
-## IDynaFetchParams
-```
-interface IDynaFetchParams {
-  timeout?: number;         // in ms, when the fetch will fail
-  retryMaxTimes?: number;	// how many times should retry (defalut = 1)
-  retryTimeout?: number;    // in ms, retry after a timeout (after a network fail or timeout fail)
-  onRetry?: () => void;		// callback in case of retry
-}
-```
+## v2.0.0
 
-## IError
-
-```
-interface IError {
-  code?: number | string; // code
-  section?: string;       // section of the application (dynaFetch in this case)
-  message?: string;       // a meaningful dev/debug message
-  data?: any;             // the arguments where the dynaFetch called
-  error?: any;            // nested error
-}
-```
+- Working with [axios](https://github.com/axios/axios)
+- Pre-flight requests with CORS
+- Retry with random factor

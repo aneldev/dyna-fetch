@@ -1,6 +1,6 @@
-import {dynaFetch, IDynaFetch} from "../../src";
+import {dynaFetch, IDynaFetchHandler} from "../../src";
 import {IError} from "dyna-interfaces";
-import {AxiosResponse} from "../../src/dynaFetch";
+import {AxiosResponse} from "../../src";
 
 declare let jasmine: any, describe: any, expect: any, it: any;
 if (typeof jasmine !== 'undefined') jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
@@ -33,8 +33,9 @@ describe('dynaFetch test', () => {
   });
 
   it('should not fetch because of abort method call', (done: Function) => {
-    let fetchClients: IDynaFetch = dynaFetch('https://httpstat.us/200?sleep=3000', {}, {
-      timeout: 1000,
+    let fetchClients: IDynaFetchHandler = dynaFetch({
+      url: 'https://httpstat.us/200?sleep=3000',
+      retryTimeout: 1000,
     });
     fetchClients
       .then((response: AxiosResponse) => {
@@ -49,8 +50,9 @@ describe('dynaFetch test', () => {
   });
 
   it('should not fetch because of timeout', (done: Function) => {
-    dynaFetch('https://httpstat.us/200?sleep=3000', {}, {
-      timeout: 1000,
+    dynaFetch({
+      url: 'https://httpstat.us/200?sleep=3000',
+      retryTimeout: 1000,
     })
       .then((response: AxiosResponse) => {
         expect(response).toBe(undefined);
@@ -64,10 +66,10 @@ describe('dynaFetch test', () => {
 
   it('should not fetch because of timeout but with 3 retries', (done: Function) => {
     let retried: number = 0;
-    dynaFetch('https://httpstat.us/200?sleep=3000', {}, {
-      timeout: 400,
+    dynaFetch( {
+      url: 'https://httpstat.us/200?sleep=3000',
+      retryTimeout: 400,
       retryMaxTimes: 3,
-      retryTimeout: 100,
       onRetry: () => retried++,
     })
       .then((response: AxiosResponse) => {
@@ -85,7 +87,8 @@ describe('dynaFetch test', () => {
   it('should not fetch because of bad address with 3 retries', (done: Function) => {
     let retried: number = 0;
     let started: Date = new Date();
-    dynaFetch('http://www.987609234624-x-5245245.com', {}, {
+    dynaFetch( {
+      url: 'http://www.987609234624-x-5245245.com',
       retryMaxTimes: 3,
       retryTimeout: 200,
       onRetry: () => retried++,

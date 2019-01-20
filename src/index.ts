@@ -1,7 +1,7 @@
 export {
   dynaFetch,
-  IDynaFetchParams,
-  IDynaFetch,
+  IDynaFetchConfig,
+  IDynaFetchHandler,
   AxiosResponse,
   AxiosRequestConfig,
   IError,

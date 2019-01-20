@@ -133,7 +133,7 @@ var defaultDynaFetchParams = {
   timeout: 0,
   retryMaxTimes: 0,
   retryTimeout: 0,
-  timeoutRandomFactor: 1,
+  timeoutRandomFactor: undefined,
   onRetry: function () {
     return undefined;
   }
@@ -157,7 +157,7 @@ exports.dynaFetch = function (url, axiosRequestConfig, dynaFetchParams_) {
   var debugInfo;
 
   var getDelay = function () {
-    return dynaFetchParams.retryTimeout * (dyna_loops_1.random(0, dynaFetchParams.timeoutRandomFactor * 100) / 100);
+    return dynaFetchParams.timeoutRandomFactor === undefined ? dynaFetchParams.retryTimeout : dynaFetchParams.retryTimeout * (dyna_loops_1.random(0, dynaFetchParams.timeoutRandomFactor * 100) / 100);
   };
 
   var output = new Promise(function (resolve, reject) {
@@ -170,9 +170,20 @@ exports.dynaFetch = function (url, axiosRequestConfig, dynaFetchParams_) {
     };
 
     var callFetch = function () {
-      axios_1.default.request(__assign({}, axiosRequestConfig, {
-        url: url || axiosRequestConfig.url
-      })).then(function (response) {
+      Promise.resolve().then(function () {
+        return axios_1.default.request({
+          url: url || axiosRequestConfig.url,
+          method: "OPTIONS",
+          headers: {// "Access-Control-Request-Method": axiosRequestConfig.method || "GET",
+            // "Access-Control-Request-Headers": "origin, x-requested-with",
+            // "Origin": location.href,
+          }
+        });
+      }).then(function () {
+        return axios_1.default.request(__assign({}, axiosRequestConfig, {
+          url: url || axiosRequestConfig.url
+        }));
+      }).then(function (response) {
         if (aborted) return;
         if (timeoutTimer) clearTimeout(timeoutTimer);
         resolve(response);
@@ -183,7 +194,7 @@ exports.dynaFetch = function (url, axiosRequestConfig, dynaFetchParams_) {
 
         if (dynaFetchParams.retryMaxTimes && failedTimes <= dynaFetchParams.retryMaxTimes) {
           dynaFetchParams.onRetry && dynaFetchParams.onRetry();
-          setTimeout(function () {
+          timeoutTimer = setTimeout(function () {
             return callFetch();
           }, getDelay());
         } else {
@@ -204,7 +215,7 @@ exports.dynaFetch = function (url, axiosRequestConfig, dynaFetchParams_) {
 
           if (dynaFetchParams.retryMaxTimes && failedTimes <= dynaFetchParams.retryMaxTimes) {
             dynaFetchParams.onRetry && dynaFetchParams.onRetry();
-            setTimeout(function () {
+            timeoutTimer = setTimeout(function () {
               return callFetch();
             }, getDelay());
           } else {
@@ -216,7 +227,7 @@ exports.dynaFetch = function (url, axiosRequestConfig, dynaFetchParams_) {
               data: debugInfo
             });
           }
-        }, dynaFetchParams.timeout);
+        }, getDelay());
       }
     };
 

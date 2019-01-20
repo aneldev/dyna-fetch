@@ -11,11 +11,16 @@
     "declaration": true,
     "declarationDir": "./dist/",
     "sourceMap": true,
-    "noImplicitAny": false,
     "module": "commonjs",
     "target": "es5",
     "allowJs": false,
+    "noImplicitAny": true,
     "noErrorTruncation": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": true,
     "skipLibCheck": true,
     "types": [
       "node"
