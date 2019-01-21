@@ -1,5 +1,3 @@
-declare let global: any;
-
 class LocalStorageMock {
 	private store: any;
 
