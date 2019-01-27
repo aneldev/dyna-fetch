@@ -1,14 +1,25 @@
 {
   "compilerOptions": {
+    "lib": [
+      "es2015",
+      "es2015.promise",
+      "es2016",
+      "es6",
+      "dom"
+    ],
     "outDir": "../temp",
     "declaration": true,
     "declarationDir": "../temp",
     "sourceMap": true,
     "noImplicitAny": false,
     "module": "commonjs",
-    "target": "es6",
+    "target": "es5",
     "allowJs": false,
-    "types" : ["node"]
+    "noErrorTruncation": true,
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ]
   },
   "files": [
     "./index.ts"

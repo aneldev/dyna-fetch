@@ -1,46 +1,107 @@
-import * as fetch from 'isomorphic-fetch';
+import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
+import {random} from "dyna-loops";
 import {IError} from "dyna-interfaces";
 
-export interface IDynaFetchParams {
-  timeout?: number;         // in ms
-  retryMaxTimes?: number;
-  retryTimeout?: number;    // in ms
-  onRetry?: () => void;
+export interface IDynaFetchConfig {
+  url: string;
+  requestConfig?: AxiosRequestConfig; // help: https://github.com/axios/axios#axios-api
+  preFlight?: boolean;                // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
+  retryMaxTimes?: number;             // default: 0
+  retryTimeout?: number;              // default: 0, in ms
+  retryRandomFactor?: number;         // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
+  onRetry?: () => void;               // callback called on each retry
 }
 
-export interface IDynaFetch extends Promise<Response> {
-  abort?: () => void;
-}
-
-const defaultDynaFetchParams: IDynaFetchParams = {
-  timeout: 0,
-  retryMaxTimes: 0,
+const defaultDynaFetchParams: IDynaFetchConfig = {
+  url: "",
+  requestConfig: {},
+  preFlight: false,
   retryTimeout: 0,
+  retryMaxTimes: 0,
+  retryRandomFactor: undefined,
   onRetry: () => undefined,
 };
 
-export {IError};
+export interface IDynaFetchHandler extends Promise<AxiosResponse> {
+  abort: () => void;
+}
 
-export const dynaFetch = (url: string, fetchParams: RequestInit = {}, dynaFetchParams_: IDynaFetchParams = {}): IDynaFetch => {
-  const dynaFetchParams: IDynaFetchParams = {
+export {
+  AxiosRequestConfig, AxiosResponse,
+  IError,
+};
+
+interface IDynaFetchConfigWorking {
+  url: string;
+  requestConfig: AxiosRequestConfig;
+  preFlight: boolean;
+  retryMaxTimes: number;
+  retryTimeout: number;
+  retryRandomFactor: number;
+  onRetry: () => void;
+}
+
+export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): IDynaFetchHandler => {
+  const {
+    url: userUrl,
+    requestConfig,
+    preFlight,
+    retryTimeout,
+    retryMaxTimes,
+    retryRandomFactor,
+    onRetry,
+  } = {
     ...defaultDynaFetchParams,
-    ...dynaFetchParams_,
-  };
+    ...(typeof dynaFetchConfig === "string"
+        ? {url: dynaFetchConfig}
+        : dynaFetchConfig as IDynaFetchConfig
+    ),
+  } as IDynaFetchConfigWorking;
+
   let aborted: boolean = false;
   let timeoutTimer: any;
   let failedTimes: number = 0;
   let reject_: (error: IError)=>void;
-  let debugInfo: any;
 
-  const output: IDynaFetch = new Promise((resolve: (response: Response) => void, reject: (error: IError) => void) => {
+  const getDelay = (): number =>
+    retryRandomFactor === undefined
+      ? retryTimeout
+      : retryTimeout * (random(0, retryRandomFactor * 100) / 100);
+
+  const url: string = userUrl || (requestConfig && requestConfig.url) || userUrl;
+
+  const output = new Promise((resolve: (response: AxiosResponse) => void, reject: (error: IError) => void) => {
     reject_ = reject;
-    debugInfo = {url, fetchParams, dynaFetchParams: dynaFetchParams_, failedTimes};
 
     const callFetch = () => {
 
-      fetch(url, fetchParams)
+      Promise.resolve()
 
-        .then((response: Response) => {
+        .then(() => {
+          if (preFlight) {
+            return axios.request<TData>({
+              url,
+              method: "OPTIONS",
+              headers: {
+                "Access-Control-Request-Method": requestConfig.method || "GET",
+                "Access-Control-Request-Headers": "origin, x-requested-with",
+                "Origin": location.href,
+              },
+            })
+          }
+          else {
+            return Promise.resolve() as any;
+          }
+        })
+
+        .then(() => {
+          return axios.request<TData>({
+            ...requestConfig,
+            url,
+          })
+        })
+
+        .then((response) => {
           if (aborted) return;
           if (timeoutTimer) clearTimeout(timeoutTimer);
           resolve(response);
@@ -52,30 +113,29 @@ export const dynaFetch = (url: string, fetchParams: RequestInit = {}, dynaFetchP
 
           failedTimes++;
 
-          if (dynaFetchParams.retryMaxTimes && failedTimes <= dynaFetchParams.retryMaxTimes) {
-            dynaFetchParams.onRetry && dynaFetchParams.onRetry();
-            setTimeout(() => callFetch(), dynaFetchParams.retryTimeout);
+          if (retryMaxTimes && failedTimes <= retryMaxTimes) {
+            onRetry && onRetry();
+            timeoutTimer = setTimeout(() => callFetch(), getDelay());
           }
           else {
             reject({
               code: 5007,
               message: 'general fetch network error (see the error property)',
-              data: debugInfo,
               error
             });
           }
 
         });
 
-      if (dynaFetchParams.timeout) {
+      if (retryTimeout) {
         timeoutTimer = setTimeout(() => {
           if (aborted) return;
           if (timeoutTimer) clearTimeout(timeoutTimer);
           failedTimes++;
 
-          if (dynaFetchParams.retryMaxTimes && failedTimes <= dynaFetchParams.retryMaxTimes) {
-            dynaFetchParams.onRetry && dynaFetchParams.onRetry();
-            setTimeout(() => callFetch(), dynaFetchParams.retryTimeout);
+          if (retryMaxTimes && failedTimes <= retryMaxTimes) {
+            onRetry && onRetry();
+            timeoutTimer = setTimeout(() => callFetch(), getDelay());
           }
           else {
             aborted = true;
@@ -83,19 +143,17 @@ export const dynaFetch = (url: string, fetchParams: RequestInit = {}, dynaFetchP
               code: 5017,
               section: 'dynaFetch',
               message: 'timeout error',
-              data: debugInfo,
             });
           }
-        }, dynaFetchParams.timeout);
+        }, getDelay());
       }
 
     };
 
     callFetch();
-
   });
 
-  output.abort = () => {
+  (output as IDynaFetchHandler).abort = () => {
     if (timeoutTimer) clearTimeout(timeoutTimer);
     aborted = true;
 
@@ -103,9 +161,9 @@ export const dynaFetch = (url: string, fetchParams: RequestInit = {}, dynaFetchP
       code: 5019,
       section: 'dynaFetch',
       message: 'abort',
-      data: debugInfo,
     });
   };
 
-  return output;
+  return output as IDynaFetchHandler;
 };
+
