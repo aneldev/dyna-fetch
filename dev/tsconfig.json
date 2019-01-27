@@ -1,32 +1,11 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "lib": [
-      "es2015",
-      "es2015.promise",
-      "es2016",
-      "es6",
-      "dom"
-    ],
     "outDir": "../temp",
-    "declaration": true,
-    "declarationDir": "../temp",
-    "sourceMap": true,
-    "noImplicitAny": false,
-    "module": "commonjs",
-    "target": "es5",
-    "allowJs": false,
-    "noErrorTruncation": true,
-    "skipLibCheck": true,
-    "types": [
-      "node"
-    ]
+    "declarationDir": "./dist/commonjs",
+    "module": "commonjs"
   },
   "files": [
     "./index.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ],
-  "compileOnSave": false
+  ]
 }

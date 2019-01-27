@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist/commonjs",
+    "declarationDir": "./dist/commonjs",
     "module": "commonjs"
   }
 }

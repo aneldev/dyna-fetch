@@ -1,5 +1,5 @@
 import "dyna-node-console";
 
-import "../utils/unhandledPromiseRejections";
+import "../dyna/unhandledPromiseRejections";
 
 console.log('Debug module');

@@ -9,7 +9,7 @@
   "sideEffects": false,
   "main": "dist/commonjs/index.js",
   "types": "dist/commonjs/index.d.ts",
-  "esnext": "dist/es2015/index.d.ts",
+  "esnext": "dist/esNext/index.d.ts",
   "source": "src/index.ts",
   "scripts": {
     "clear": "rimraf build temp",
@@ -30,7 +30,7 @@
     "debug-tests-run": "node --expose-gc debug-ground/debug-test-on-nodejs/index.js",
     "sync-externals": "node syncExternals.js",
     "build-analyze": "set NODE_ENV=development && webpack --config webpack.dist.analyze.config.js",
-    "build": "rm -rf ./dist && tsc --p tsconfig.commonjs.json && tsc --p tsconfig.es2015.json",
+    "build": "rm -rf ./dist && tsc --p tsconfig.commonjs.json && tsc --p tsconfig.esNext.json",
     "release": "yarn run build && yarn run publish-push",
     "test": "jest --coverage --no-cache --runInBand",
     "test-watch": "jest --watch --verbose --runInBand",
