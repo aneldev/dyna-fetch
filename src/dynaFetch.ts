@@ -1,21 +1,23 @@
-import axios, {AxiosRequestConfig, AxiosResponse} from 'axios';
+import axios, {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
 import {random} from "dyna-loops";
 import {IError} from "dyna-interfaces";
 
 export interface IDynaFetchConfig {
   url: string;
-  requestConfig?: AxiosRequestConfig; // help: https://github.com/axios/axios#axios-api
-  preFlight?: boolean;                // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
-  retryMaxTimes?: number;             // default: 0
-  retryTimeout?: number;              // default: 0, in ms
-  retryRandomFactor?: number;         // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
-  onRetry?: () => void;               // callback called on each retry
+  requestConfig?: AxiosRequestConfig;         // help: https://github.com/axios/axios#axios-api
+  preFlight?: boolean;                        // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
+  retry?: (error: AxiosError) => boolean;     // default: () => true; Validate the error. Return true to retry or false to return the error.
+  retryMaxTimes?: number;                     // default: 0
+  retryTimeout?: number;                      // default: 0, in ms
+  retryRandomFactor?: number;                 // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
+  onRetry?: () => void;                       // callback called on each retry
 }
 
 const defaultDynaFetchParams: IDynaFetchConfig = {
   url: "",
   requestConfig: {},
   preFlight: false,
+  retry: () => true,
   retryTimeout: 0,
   retryMaxTimes: 0,
   retryRandomFactor: undefined,
@@ -35,6 +37,7 @@ interface IDynaFetchConfigWorking {
   url: string;
   requestConfig: AxiosRequestConfig;
   preFlight: boolean;
+  retry: (error: AxiosError) => boolean;
   retryMaxTimes: number;
   retryTimeout: number;
   retryRandomFactor: number;
@@ -46,6 +49,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
     url: userUrl,
     requestConfig,
     preFlight,
+    retry,
     retryTimeout,
     retryMaxTimes,
     retryRandomFactor,
@@ -107,22 +111,18 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
           resolve(response);
         })
 
-        .catch((error: any) => {
+        .catch((error: AxiosError) => {
           if (aborted) return;
           if (timeoutTimer) clearTimeout(timeoutTimer);
 
           failedTimes++;
 
-          if (retryMaxTimes && failedTimes <= retryMaxTimes) {
+          if (retry(error) && retryMaxTimes && failedTimes <= retryMaxTimes) {
             onRetry && onRetry();
             timeoutTimer = setTimeout(() => callFetch(), getDelay());
           }
           else {
-            reject({
-              code: 5007,
-              message: 'general fetch network error (see the error property)',
-              error
-            });
+            reject(error);
           }
 
         });
@@ -142,7 +142,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
             reject({
               code: 5017,
               section: 'dynaFetch',
-              message: 'timeout error',
+              message: 'Client request timeout error',
             });
           }
         }, getDelay());
@@ -160,7 +160,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
     reject_({
       code: 5019,
       section: 'dynaFetch',
-      message: 'abort',
+      message: 'Aborted',
     });
   };
 

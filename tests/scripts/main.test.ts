@@ -43,7 +43,7 @@ describe('dynaFetch test', () => {
         done();
       })
       .catch((error: IError) => {
-        expect(error.code).toBe(5019);
+        expect(error.message).toBe("Aborted");
         done();
       });
     fetchClients.abort();
@@ -59,7 +59,7 @@ describe('dynaFetch test', () => {
         done();
       })
       .catch((error: IError) => {
-        expect(error.code).toBe(5017);
+        expect(error.message).toBe("Client request timeout error");
         done();
       });
   });
@@ -77,9 +77,8 @@ describe('dynaFetch test', () => {
         done();
       })
       .catch((error: IError) => {
-        expect(error.code).toBe(5017);
+        expect(error.message).toBe("Client request timeout error");
         expect(retried).toBe(3);
-        expect(error.error).toBe(undefined);
         done();
       });
   });
@@ -88,7 +87,7 @@ describe('dynaFetch test', () => {
     let retried: number = 0;
     let started: Date = new Date();
     dynaFetch( {
-      url: 'http://www.987609234624-x-5245245.com',
+      url: 'http://www.INVALID-ADDESS-987609234624-x-5245245.com',
       retryMaxTimes: 3,
       retryTimeout: 200,
       onRetry: () => retried++,
@@ -99,9 +98,29 @@ describe('dynaFetch test', () => {
       })
       .catch((error: IError) => {
         let ended: Date = new Date();
-        expect(error.code).toBe(5007);
+        expect(error).not.toBe(undefined);
         expect(Number(ended) - Number(started) > 600).toBe(true);
-        expect(error.error).not.toBe(undefined);
+        expect(retried).toBe(3);
+        done();
+      });
+  });
+
+  it('should not fetch because of bad address with 2 retries with retry()=>false on 2nd', (done: Function) => {
+    let retried: number = 0;
+    dynaFetch({
+      url: 'http://www.INVALID-ADDESS-987609234624-x-5245245.com',
+      retryMaxTimes: 3,
+      retryTimeout: 200,
+      retry: () => retried < 2,
+      onRetry: () => retried++,
+    })
+      .then((response: AxiosResponse) => {
+        expect(response).toBe(undefined);
+        done();
+      })
+      .catch((error: IError) => {
+        expect(error).not.toBe(undefined);
+        expect(retried).toBe(2);
         done();
       });
   });
