@@ -29,7 +29,8 @@ export interface IDynaFetchHandler extends Promise<AxiosResponse> {
 }
 
 export {
-  AxiosRequestConfig, AxiosResponse,
+  AxiosRequestConfig,
+  AxiosResponse,
   IError,
 };
 

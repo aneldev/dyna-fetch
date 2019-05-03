@@ -25,7 +25,7 @@ const myRequest = dynaFetch({
 .then((response: AxiosResponse) => {
 	// this is the response object of isomorphic-fetch
 })
-.catch((error: IError) => {
+.catch((error: IError | AxiosError) => {
 	// error.error is the isomorphic-fetch's error (if the error came from it)
 });
 
@@ -39,12 +39,13 @@ myRequest.abort();
 ```
 interface IDynaFetchConfig {
   url: string;
-  requestConfig?: AxiosRequestConfig; // help: https://github.com/axios/axios#axios-api
-  preFlight?: boolean;                // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
-  retryMaxTimes?: number;             // default: 0
-  retryTimeout?: number;              // default: 0, in ms
-  retryRandomFactor?: number;         // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
-  onRetry?: () => void;               // callback called on each retry
+  requestConfig?: AxiosRequestConfig;         // help: https://github.com/axios/axios#axios-api
+  preFlight?: boolean;                        // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
+  retry?: (error: AxiosError) => boolean;     // default: () => true; Validate the error. Return true to retry or false to return the error.
+  retryMaxTimes?: number;                     // default: 0
+  retryTimeout?: number;                      // default: 0, in ms
+  retryRandomFactor?: number;                 // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
+  onRetry?: () => void;                       // callback called on each retry
 }
 ```
 
@@ -79,10 +80,6 @@ interface IError {
 }
 ```
 
-## error.code 5007
-
-In `error.error` is the error of the `isomorphic-fetch`. You should check this to get the network error.
-
 ## error.code 5017
 
 In case of timeout.
@@ -103,3 +100,8 @@ In case of `abort()` call.
 - Working with [axios](https://github.com/axios/axios)
 - Pre-flight requests with CORS
 - Retry with random factor
+
+## v3.0.0
+
+- New prop `retry?: (error: AxiosError) => boolean;`. Validate the error to retry or not.
+- The returned error is not an IError that wraps the AxiosError but the AxiosError directly. Still the IError returned on 5017 & 5019.
