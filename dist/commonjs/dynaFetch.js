@@ -17,6 +17,7 @@ var defaultDynaFetchParams = {
     url: "",
     requestConfig: {},
     preFlight: false,
+    retry: function () { return true; },
     retryTimeout: 0,
     retryMaxTimes: 0,
     retryRandomFactor: undefined,
@@ -25,7 +26,7 @@ var defaultDynaFetchParams = {
 exports.dynaFetch = function (dynaFetchConfig) {
     var _a = __assign({}, defaultDynaFetchParams, (typeof dynaFetchConfig === "string"
         ? { url: dynaFetchConfig }
-        : dynaFetchConfig)), userUrl = _a.url, requestConfig = _a.requestConfig, preFlight = _a.preFlight, retryTimeout = _a.retryTimeout, retryMaxTimes = _a.retryMaxTimes, retryRandomFactor = _a.retryRandomFactor, onRetry = _a.onRetry;
+        : dynaFetchConfig)), userUrl = _a.url, requestConfig = _a.requestConfig, preFlight = _a.preFlight, retry = _a.retry, retryTimeout = _a.retryTimeout, retryMaxTimes = _a.retryMaxTimes, retryRandomFactor = _a.retryRandomFactor, onRetry = _a.onRetry;
     var aborted = false;
     var timeoutTimer;
     var failedTimes = 0;
@@ -72,16 +73,12 @@ exports.dynaFetch = function (dynaFetchConfig) {
                 if (timeoutTimer)
                     clearTimeout(timeoutTimer);
                 failedTimes++;
-                if (retryMaxTimes && failedTimes <= retryMaxTimes) {
+                if (retry(error) && retryMaxTimes && failedTimes <= retryMaxTimes) {
                     onRetry && onRetry();
                     timeoutTimer = setTimeout(function () { return callFetch(); }, getDelay());
                 }
                 else {
-                    reject({
-                        code: 5007,
-                        message: 'general fetch network error (see the error property)',
-                        error: error
-                    });
+                    reject(error);
                 }
             });
             if (retryTimeout) {
@@ -100,7 +97,7 @@ exports.dynaFetch = function (dynaFetchConfig) {
                         reject({
                             code: 5017,
                             section: 'dynaFetch',
-                            message: 'timeout error',
+                            message: 'Client request timeout error',
                         });
                     }
                 }, getDelay());
@@ -115,7 +112,7 @@ exports.dynaFetch = function (dynaFetchConfig) {
         reject_({
             code: 5019,
             section: 'dynaFetch',
-            message: 'abort',
+            message: 'Aborted',
         });
     };
     return output;

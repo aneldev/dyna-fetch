@@ -1,9 +1,10 @@
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { IError } from "dyna-interfaces";
 export interface IDynaFetchConfig {
     url: string;
     requestConfig?: AxiosRequestConfig;
     preFlight?: boolean;
+    retry?: (error: AxiosError) => boolean;
     retryMaxTimes?: number;
     retryTimeout?: number;
     retryRandomFactor?: number;
