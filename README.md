@@ -23,10 +23,10 @@ const myRequest = dynaFetch({
     onRetry: () => console.log('retrying...'), // (optional) 
     })
 .then((response: AxiosResponse) => {
-	// this is the response object of isomorphic-fetch
+	// ...
 })
 .catch((error: IError | AxiosError) => {
-	// error.error is the isomorphic-fetch's error (if the error came from it)
+	// ...
 });
 
 // later you can abort it
