@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
+import axios, {AxiosError, AxiosRequestConfig, AxiosResponse, Canceler} from 'axios';
 import {random} from "dyna-loops";
 import {IError} from "dyna-interfaces";
 
@@ -26,6 +26,7 @@ const defaultDynaFetchParams: IDynaFetchConfig = {
 
 export interface IDynaFetchHandler extends Promise<AxiosResponse> {
   abort: () => void;
+  cancel: (message?: string) => void;
 }
 
 export {
@@ -66,7 +67,11 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
   let aborted: boolean = false;
   let timeoutTimer: any;
   let failedTimes: number = 0;
-  let reject_: (error: IError)=>void;
+  let reject_: (error: IError) => void;
+
+  let cancelFunction: Canceler;
+  let cancelRequested = false;
+  let cancelRequestedMessage: string | undefined;
 
   const getDelay = (): number =>
     retryRandomFactor === undefined
@@ -103,7 +108,11 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
           return axios.request<TData>({
             ...requestConfig,
             url,
-          })
+            cancelToken: new axios.CancelToken(c => {
+              cancelFunction = c;
+              if (cancelRequested) cancelFunction(cancelRequestedMessage);
+            }),
+          });
         })
 
         .then((response) => {
@@ -163,6 +172,15 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
       section: 'dynaFetch',
       message: 'Aborted',
     });
+  };
+
+  (output as IDynaFetchHandler).cancel = message => {
+    if (cancelFunction)
+      cancelFunction(message);
+    else {
+      cancelRequested = true;
+      cancelRequestedMessage = message;
+    }
   };
 
   return output as IDynaFetchHandler;

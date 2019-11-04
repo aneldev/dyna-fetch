@@ -1,9 +1,9 @@
-import {dynaFetch, IDynaFetchHandler} from "../../src";
+import "jest";
 import {IError} from "dyna-interfaces";
-import {AxiosResponse} from "../../src";
 
-declare let jasmine: any, describe: any, expect: any, it: any;
-if (typeof jasmine !== 'undefined') jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+import {dynaFetch, IDynaFetchHandler, AxiosResponse} from "../../src";
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 
 // help: https://facebook.github.io/jest/docs/expect.html
 
@@ -33,11 +33,11 @@ describe('dynaFetch test', () => {
   });
 
   it('should not fetch because of abort method call', (done: Function) => {
-    let fetchClients: IDynaFetchHandler = dynaFetch({
+    const fetch: IDynaFetchHandler = dynaFetch({
       url: 'https://httpstat.us/200?sleep=3000',
       retryTimeout: 1000,
     });
-    fetchClients
+    fetch
       .then((response: AxiosResponse) => {
         expect(response).toBe(undefined);
         done();
@@ -46,7 +46,7 @@ describe('dynaFetch test', () => {
         expect(error.message).toBe("Aborted");
         done();
       });
-    fetchClients.abort();
+    fetch.abort();
   });
 
   it('should not fetch because of timeout', (done: Function) => {
@@ -81,6 +81,44 @@ describe('dynaFetch test', () => {
         expect(retried).toBe(3);
         done();
       });
+  });
+
+  it('should cancel the request immediately', (done: Function) => {
+    const fetch = dynaFetch({
+      url: 'https://httpstat.us/200?sleep=4000',
+    });
+    fetch
+      .then((response: AxiosResponse) => {
+        fail({
+          message: 'Response was unexpected',
+          response,
+        });
+      })
+      .catch((error: IError) => {
+        expect(error.message).toBe('Fetch canceled')
+      })
+      .then(() => done());
+    fetch.cancel('Fetch canceled');
+  });
+
+  it('should cancel the request after 1sec', (done: Function) => {
+    const fetch = dynaFetch({
+      url: 'https://httpstat.us/200?sleep=4000',
+    });
+    fetch
+      .then((response: AxiosResponse) => {
+        fail({
+          message: 'Response was unexpected',
+          response,
+        });
+      })
+      .catch((error: IError) => {
+        expect(error.message).toBe('Fetch canceled')
+      })
+      .then(() => done());
+    setTimeout(()=>{
+      fetch.cancel('Fetch canceled');
+    },1000);
   });
 
   it('should not fetch because of bad address with 3 retries', (done: Function) => {

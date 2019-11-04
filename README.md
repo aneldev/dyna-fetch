@@ -21,16 +21,21 @@ const myRequest = dynaFetch({
     retryTimeout: 1000,     // (optional) wait for 1sec for each retry
     retryRandomFactor: 1,   // (optional) timeout factor
     onRetry: () => console.log('retrying...'), // (optional) 
-    })
-.then((response: AxiosResponse) => {
-	// ...
-})
-.catch((error: IError | AxiosError) => {
-	// ...
 });
 
-// later you can abort it
+myRequest
+    .then((response: AxiosResponse) => {
+        // ...
+    })
+    .catch((error: IError | AxiosError) => {
+        // ...
+    });
+
+// later you can abort it, rejects the promise
 myRequest.abort();
+
+// later you can cancel it, rejects the promise
+myRequest.cancel('Fetch is canceled');
 
 ```
 
@@ -49,18 +54,27 @@ interface IDynaFetchConfig {
 }
 ```
 
-# The Abort feature
+# dynaFetch API
 
 The `dynaFetch()` returns this object.
 ```
 {
   abort: () => void;
+  cancel: (message?: string) => void;
 }
 ```
 
+## Abort
+
 During the execution of the request, you can abort the request.
 
-**Note**: The request is not really aborted! Due to the nature of promises this cannot be done at the moment. The `dyna-fetch` is swallowing the aborted request. 
+**Note**: The request is not a cancellation! Abort swallows the response and resolves the promise.
+
+## Cancel (new 10/19)
+
+Cancel the XHR request.
+
+Cancel rejects the promise.
 
 # Errors
 
