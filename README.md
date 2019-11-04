@@ -62,7 +62,6 @@ During the execution of the request, you can abort the request.
 
 **Note**: The request is not really aborted! Due to the nature of promises this cannot be done at the moment. The `dyna-fetch` is swallowing the aborted request. 
 
-
 # Errors
 
 In case of a rejected request, if the error has to do with features of the `dyna-fetch`, the `IError` will be returned.
