@@ -4,10 +4,11 @@
 
 - pre-flight to bypass CORS
 - timeout
+- cancel
 - retry
-- abort*
+- abort
 
-Written in Typescript, it is universal and runs everywhere (in Typescript or Javascript).
+Written in Typescript, it is universal and runs everywhere browser/nodeJs/.
 
 # Usage
 ```
@@ -15,7 +16,7 @@ import {dynaFetch} from 'dyna-fetch';
 
 const myRequest = dynaFetch({
     url: 'https://example.com/api?client=3002',
-    preFlight: true,        // (optional) bypass CORS
+    preFlight: true,        // (optional) try to bypass CORS
     timeout: 20000,         // (optional) wait for max 20 seconds
     retryMaxTimes: 3,       // (optional) retry max 3 times
     retryTimeout: 1000,     // (optional) wait for 1sec for each retry
@@ -56,7 +57,10 @@ interface IDynaFetchConfig {
 
 # dynaFetch API
 
-The `dynaFetch()` returns this object.
+The `dynaFetch()` returns a promise object together with a small API object.
+
+TS the type of th result is `IDynaFetchHandler`.
+
 ```
 {
   abort: () => void;
@@ -118,3 +122,8 @@ In case of `abort()` call.
 
 - New prop `retry?: (error: AxiosError) => boolean;`. Validate the error to retry or not.
 - The returned error is not an IError that wraps the AxiosError but the AxiosError directly. Still the IError returned on 5017 & 5019.
+
+## v3.1.0
+
+- Cancel request on demand
+- Cancel request on retry
