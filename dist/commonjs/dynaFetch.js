@@ -77,6 +77,8 @@ exports.dynaFetch = function (dynaFetchConfig) {
                 .catch(function (error) {
                 if (aborted)
                     return;
+                if (error.message === 'Canceled-due-to-dynaFetch-retry-093587082460248546')
+                    return;
                 if (timeoutTimer)
                     clearTimeout(timeoutTimer);
                 failedTimes++;
@@ -97,6 +99,7 @@ exports.dynaFetch = function (dynaFetchConfig) {
                     failedTimes++;
                     if (retryMaxTimes && failedTimes <= retryMaxTimes) {
                         onRetry && onRetry();
+                        cancelFunction('Canceled-due-to-dynaFetch-retry-093587082460248546');
                         timeoutTimer = setTimeout(function () { return callFetch(); }, getDelay());
                     }
                     else {
