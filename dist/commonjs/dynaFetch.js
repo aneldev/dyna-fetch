@@ -31,6 +31,9 @@ exports.dynaFetch = function (dynaFetchConfig) {
     var timeoutTimer;
     var failedTimes = 0;
     var reject_;
+    var cancelFunction;
+    var cancelRequested = false;
+    var cancelRequestedMessage;
     var getDelay = function () {
         return retryRandomFactor === undefined
             ? retryTimeout
@@ -58,7 +61,11 @@ exports.dynaFetch = function (dynaFetchConfig) {
                 }
             })
                 .then(function () {
-                return axios_1.default.request(__assign({}, requestConfig, { url: url }));
+                return axios_1.default.request(__assign({}, requestConfig, { url: url, cancelToken: new axios_1.default.CancelToken(function (c) {
+                        cancelFunction = c;
+                        if (cancelRequested)
+                            cancelFunction(cancelRequestedMessage);
+                    }) }));
             })
                 .then(function (response) {
                 if (aborted)
@@ -114,6 +121,14 @@ exports.dynaFetch = function (dynaFetchConfig) {
             section: 'dynaFetch',
             message: 'Aborted',
         });
+    };
+    output.cancel = function (message) {
+        if (cancelFunction)
+            cancelFunction(message);
+        else {
+            cancelRequested = true;
+            cancelRequestedMessage = message;
+        }
     };
     return output;
 };

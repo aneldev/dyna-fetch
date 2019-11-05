@@ -12,6 +12,7 @@ export interface IDynaFetchConfig {
 }
 export interface IDynaFetchHandler extends Promise<AxiosResponse> {
     abort: () => void;
+    cancel: (message?: string) => void;
 }
 export { AxiosRequestConfig, AxiosResponse, IError, };
 export declare const dynaFetch: <TData>(dynaFetchConfig: string | IDynaFetchConfig) => IDynaFetchHandler;

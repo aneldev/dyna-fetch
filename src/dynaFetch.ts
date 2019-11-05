@@ -123,6 +123,8 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
 
         .catch((error: AxiosError) => {
           if (aborted) return;
+          if (error.message === 'Canceled-due-to-dynaFetch-retry-093587082460248546') return;
+
           if (timeoutTimer) clearTimeout(timeoutTimer);
 
           failedTimes++;
@@ -145,6 +147,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
 
           if (retryMaxTimes && failedTimes <= retryMaxTimes) {
             onRetry && onRetry();
+            cancelFunction('Canceled-due-to-dynaFetch-retry-093587082460248546');
             timeoutTimer = setTimeout(() => callFetch(), getDelay());
           }
           else {
