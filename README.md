@@ -48,6 +48,7 @@ interface IDynaFetchConfig {
   requestConfig?: AxiosRequestConfig;         // help: https://github.com/axios/axios#axios-api
   preFlight?: boolean;                        // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
   retry?: (error: AxiosError) => boolean;     // default: () => true; Validate the error. Return true to retry or false to return the error.
+  cancelOnRetry?: boolean;                    // default: false; if true, in case of retry timeout the current request will be XHR canceled.
   retryMaxTimes?: number;                     // default: 0
   retryTimeout?: number;                      // default: 0, in ms
   retryRandomFactor?: number;                 // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
@@ -127,3 +128,7 @@ In case of `abort()` call.
 
 - Cancel request on demand
 - Cancel request on retry
+
+## v3.1.2
+
+- Cancel request on retry only then the `cancelOnRetry: true` config prop

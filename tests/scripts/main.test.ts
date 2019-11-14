@@ -1,9 +1,9 @@
 import "jest";
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+
 import {IError} from "dyna-interfaces";
 
 import {dynaFetch, IDynaFetchHandler, AxiosResponse} from "../../src";
-
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 
 // help: https://facebook.github.io/jest/docs/expect.html
 

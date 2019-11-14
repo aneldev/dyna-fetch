@@ -7,6 +7,7 @@ export interface IDynaFetchConfig {
   requestConfig?: AxiosRequestConfig;         // help: https://github.com/axios/axios#axios-api
   preFlight?: boolean;                        // default: false, skip CORS with pre-flight OPTIONS request (the server should support this)
   retry?: (error: AxiosError) => boolean;     // default: () => true; Validate the error. Return true to retry or false to return the error.
+  cancelOnRetry?: boolean;                    // default: false; if true, in case of retry timeout the current request will be XHR canceled.
   retryMaxTimes?: number;                     // default: 0
   retryTimeout?: number;                      // default: 0, in ms
   retryRandomFactor?: number;                 // default is 1, finalTimeout = retryTimeout * random(0, timeoutRandomFactor)
@@ -18,6 +19,7 @@ const defaultDynaFetchParams: IDynaFetchConfig = {
   requestConfig: {},
   preFlight: false,
   retry: () => true,
+  cancelOnRetry: false,
   retryTimeout: 0,
   retryMaxTimes: 0,
   retryRandomFactor: undefined,
@@ -40,6 +42,7 @@ interface IDynaFetchConfigWorking {
   requestConfig: AxiosRequestConfig;
   preFlight: boolean;
   retry: (error: AxiosError) => boolean;
+  cancelOnRetry?: boolean;
   retryMaxTimes: number;
   retryTimeout: number;
   retryRandomFactor: number;
@@ -55,6 +58,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
     retryTimeout,
     retryMaxTimes,
     retryRandomFactor,
+    cancelOnRetry,
     onRetry,
   } = {
     ...defaultDynaFetchParams,
@@ -147,7 +151,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
 
           if (retryMaxTimes && failedTimes <= retryMaxTimes) {
             onRetry && onRetry();
-            cancelFunction('Canceled-due-to-dynaFetch-retry-093587082460248546');
+            if (cancelOnRetry) cancelFunction('Canceled-due-to-dynaFetch-retry-093587082460248546');
             timeoutTimer = setTimeout(() => callFetch(), getDelay());
           }
           else {
