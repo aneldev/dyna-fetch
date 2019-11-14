@@ -16,6 +16,7 @@ var defaultDynaFetchParams = {
     requestConfig: {},
     preFlight: false,
     retry: function () { return true; },
+    cancelOnRetry: false,
     retryTimeout: 0,
     retryMaxTimes: 0,
     retryRandomFactor: undefined,
@@ -24,7 +25,7 @@ var defaultDynaFetchParams = {
 export var dynaFetch = function (dynaFetchConfig) {
     var _a = __assign({}, defaultDynaFetchParams, (typeof dynaFetchConfig === "string"
         ? { url: dynaFetchConfig }
-        : dynaFetchConfig)), userUrl = _a.url, requestConfig = _a.requestConfig, preFlight = _a.preFlight, retry = _a.retry, retryTimeout = _a.retryTimeout, retryMaxTimes = _a.retryMaxTimes, retryRandomFactor = _a.retryRandomFactor, onRetry = _a.onRetry;
+        : dynaFetchConfig)), userUrl = _a.url, requestConfig = _a.requestConfig, preFlight = _a.preFlight, retry = _a.retry, retryTimeout = _a.retryTimeout, retryMaxTimes = _a.retryMaxTimes, retryRandomFactor = _a.retryRandomFactor, cancelOnRetry = _a.cancelOnRetry, onRetry = _a.onRetry;
     var aborted = false;
     var timeoutTimer;
     var failedTimes = 0;
@@ -97,7 +98,8 @@ export var dynaFetch = function (dynaFetchConfig) {
                     failedTimes++;
                     if (retryMaxTimes && failedTimes <= retryMaxTimes) {
                         onRetry && onRetry();
-                        cancelFunction('Canceled-due-to-dynaFetch-retry-093587082460248546');
+                        if (cancelOnRetry)
+                            cancelFunction('Canceled-due-to-dynaFetch-retry-093587082460248546');
                         timeoutTimer = setTimeout(function () { return callFetch(); }, getDelay());
                     }
                     else {

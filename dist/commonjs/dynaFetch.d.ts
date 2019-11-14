@@ -5,6 +5,7 @@ export interface IDynaFetchConfig {
     requestConfig?: AxiosRequestConfig;
     preFlight?: boolean;
     retry?: (error: AxiosError) => boolean;
+    cancelOnRetry?: boolean;
     retryMaxTimes?: number;
     retryTimeout?: number;
     retryRandomFactor?: number;

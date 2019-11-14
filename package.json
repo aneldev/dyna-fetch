@@ -1,7 +1,7 @@
 {
   "name": "dyna-fetch",
   "version": "3.1.1",
-  "description": "About",
+  "description": "Fetch method with retry, cancel, abort, timeout features using Axios.",
   "repository": {
     "type": "git",
     "url": "http://github.com/aneldev/dyna-fetch"
