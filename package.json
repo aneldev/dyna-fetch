@@ -1,6 +1,6 @@
 {
   "name": "dyna-fetch",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Fetch method with retry, cancel, abort, timeout features using Axios.",
   "repository": {
     "type": "git",
