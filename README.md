@@ -73,9 +73,9 @@ TS the type of th result is `IDynaFetchHandler`.
 
 During the execution of the request, you can abort the request.
 
-**Note**: The request is not a cancellation! Abort swallows the response and resolves the promise.
+**Note**: The request is not a cancelled! The abort just swallows the response and rejects the promise.
 
-## Cancel (new 10/19)
+## Cancel
 
 Cancel the XHR request.
 
