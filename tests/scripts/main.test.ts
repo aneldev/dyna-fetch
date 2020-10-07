@@ -122,6 +122,23 @@ describe('dynaFetch test', () => {
     }, 1000);
   });
 
+  it('should reject on 400', (done: Function) => {
+    dynaFetch({
+      url: 'https://httpstat.us/400',
+    })
+      .then((response: AxiosResponse) => {
+        fail({
+          message: 'Response was unexpected',
+          response,
+        });
+      })
+      .catch((error: IError) => {
+        console.debug(error);
+        expect(error).not.toBe(undefined);
+      })
+      .then(() => done());
+  });
+
   it('should not fetch because of bad address with 3 retries', (done: Function) => {
     let retried: number = 0;
     let started: Date = new Date();
