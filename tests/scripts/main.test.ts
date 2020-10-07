@@ -1,4 +1,5 @@
 import "jest";
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 
 import {IError} from "dyna-interfaces";
@@ -15,7 +16,7 @@ describe('dynaFetch test', () => {
         done();
       })
       .catch((error: IError) => {
-        expect(error).toBe(undefined);
+        fail(error);
         done();
       });
   });
@@ -27,7 +28,7 @@ describe('dynaFetch test', () => {
         done();
       })
       .catch((error: IError) => {
-        expect(error).toBe(undefined);
+        fail(error);
         done();
       });
   });
@@ -66,7 +67,7 @@ describe('dynaFetch test', () => {
 
   it('should not fetch because of timeout but with 3 retries', (done: Function) => {
     let retried: number = 0;
-    dynaFetch( {
+    dynaFetch({
       url: 'https://httpstat.us/200?sleep=3000',
       retryTimeout: 400,
       retryMaxTimes: 3,
@@ -95,7 +96,7 @@ describe('dynaFetch test', () => {
         });
       })
       .catch((error: IError) => {
-        expect(error.message).toBe('Fetch canceled')
+        expect(error.message).toBe('Fetch canceled');
       })
       .then(() => done());
     fetch.cancel('Fetch canceled');
@@ -113,18 +114,18 @@ describe('dynaFetch test', () => {
         });
       })
       .catch((error: IError) => {
-        expect(error.message).toBe('Fetch canceled')
+        expect(error.message).toBe('Fetch canceled');
       })
       .then(() => done());
-    setTimeout(()=>{
+    setTimeout(() => {
       fetch.cancel('Fetch canceled');
-    },1000);
+    }, 1000);
   });
 
   it('should not fetch because of bad address with 3 retries', (done: Function) => {
     let retried: number = 0;
     let started: Date = new Date();
-    dynaFetch( {
+    dynaFetch({
       url: 'http://www.INVALID-ADDESS-987609234624-x-5245245.com',
       retryMaxTimes: 3,
       retryTimeout: 200,
