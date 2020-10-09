@@ -1,1 +1,1 @@
-export { dynaFetch, IDynaFetchConfig, IDynaFetchHandler, AxiosResponse, AxiosRequestConfig, IError, } from './dynaFetch';
+export { dynaFetch, IDynaFetchConfig, IDynaFetchHandler, AxiosResponse, AxiosRequestConfig, AxiosError, IError, } from './dynaFetch';
