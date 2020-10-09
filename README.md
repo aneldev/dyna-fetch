@@ -16,6 +16,9 @@ import {dynaFetch} from 'dyna-fetch';
 
 const myRequest = dynaFetch({
     url: 'https://example.com/api?client=3002',
+    requestConfig: {        // (optional)
+        data: {},           // (optional) Request body
+    },
     preFlight: true,        // (optional) try to bypass CORS
     timeout: 20000,         // (optional) wait for max 20 seconds
     retryMaxTimes: 3,       // (optional) retry max 3 times

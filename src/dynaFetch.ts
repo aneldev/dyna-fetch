@@ -34,6 +34,7 @@ export interface IDynaFetchHandler extends Promise<AxiosResponse> {
 export {
   AxiosRequestConfig,
   AxiosResponse,
+  AxiosError,
   IError,
 };
 
@@ -101,7 +102,7 @@ export const dynaFetch = <TData>(dynaFetchConfig: IDynaFetchConfig | string): ID
                 "Access-Control-Request-Headers": "origin, x-requested-with",
                 "Origin": location.href,
               },
-            })
+            });
           }
           else {
             return Promise.resolve() as any;

@@ -4,6 +4,7 @@ export {
   IDynaFetchHandler,
   AxiosResponse,
   AxiosRequestConfig,
+  AxiosError,
   IError,
 } from './dynaFetch';
 

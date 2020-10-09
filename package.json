@@ -40,7 +40,7 @@
   "author": "Anel dev",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.20.0",
     "dyna-interfaces": "^1.6.1",
     "dyna-loops": "^1.7.2"
   },
